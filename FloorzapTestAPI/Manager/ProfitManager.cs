@@ -19,7 +19,7 @@ namespace FloorzapTestAPI.Manager
                 return totalSales - totalCost;
             }
 
-            return totalSales + salesTax - totalCost;
+            return totalSales + salesTax - totalCost;            
         }
 
         public async Task<decimal> CalculateServiceProfitPercent(decimal totalSales, decimal totalCost, decimal salesTax)
@@ -33,8 +33,16 @@ namespace FloorzapTestAPI.Manager
             {
                 return 0;
             }
-
-            return (1 - (totalCost / totalSales)) * 100;
+            var result= (1 - (totalCost / totalSales)) * 100;
+            if(result < 0)
+            {
+                return 0;
+            } else if(result > 100) { 
+                return 99.99m;
+            }
+            else {
+                return result;
+            }           
         }
 
         public async Task<decimal> CalculateQuoteProfit(decimal totalSale, decimal totalCost, decimal salesTax)
@@ -44,23 +52,33 @@ namespace FloorzapTestAPI.Manager
             {
                 return totalSale - totalCost;
             }
-            return totalSale - totalCost + salesTax;
+            return totalSale - totalCost + salesTax;           
         }
 
         public async Task<decimal> CalculateQuoteProfitPercent(decimal totalSale, decimal totalCost, decimal salesTax)
         {
             var companySetting = await companySettingManager.GetCompanySettingAsync();
+            if (!companySetting.SalesTaxAsCost)
+            {
+                totalSale += salesTax;
+            }
             if ((totalSale == totalCost) || (totalSale == 0))
             {
                 return 0;
             }
-
-            if (companySetting.SalesTaxAsCost)
+            var result = (1 - (totalCost / totalSale)) * 100;
+            if (result < 0)
             {
-                return (1 - (totalCost / totalSale)) * 100;
+                return 0;
             }
-            
-            return (1 - (totalCost / (totalSale + salesTax))) * 100;
+            else if (result > 100)
+            {
+                return 99.99m;
+            } else {
+                return result;
+            }
+
+
         }
     }
 }
